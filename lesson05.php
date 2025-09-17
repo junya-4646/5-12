@@ -8,15 +8,22 @@ interface Media {
 }
 
 //　Musicメディア
-final class Music implements Media {
+class Music implements Media {
+    /** @var string */
+    private $songTitle;
 
-    public function __construct(private string $songTitle) {}
+    public function __construct(string $songTitle) {
+        $this->songTitle = $songTitle;
+    }
+
     public function getSongTitle(): string {
         return $this->songTitle;
     }
+
     public function play(): void {
         echo "[Music] {$this->songTitle} を再生中\n";
     }
+
     public function toArray(): array {
         return ['type'=>'music','title'=>$this->songTitle]; 
     }
@@ -24,8 +31,13 @@ final class Music implements Media {
 
 //　Videoメディア
 class Video implements Media {
-    
-    public function __construct(private string $videoTitle) {}
+    /** @var string */
+    private $videoTitle;
+
+    public function __construct(string $videoTitle) {
+        $this->videoTitle = $videoTitle;
+    }
+
     public function getVideoTitle(): string {
         return $this->videoTitle;
     }
@@ -33,6 +45,7 @@ class Video implements Media {
     public function play(): void {
         echo "[Video] {$this->videoTitle} を再生中\n";
     }
+
     public function toArray(): array {
         return ['type'=>'video','title'=>$this->videoTitle];
     }
@@ -40,8 +53,12 @@ class Video implements Media {
 
 //　Podcastメディア
 class Podcast implements Media {
-    
-    public function __construct(private string $episodeTitle) {}
+    /** @var string */
+    private $episodeTitle;
+
+    public function __construct(string $episodeTitle) {
+        $this->episodeTitle = $episodeTitle;
+    }
     public function getEpisodeTitle(): string {
         return $this->episodeTitle;
     }
@@ -49,6 +66,7 @@ class Podcast implements Media {
     public function play(): void {
         echo "[Podcast] [{$this->episodeTitle}] を再生中\n";
     }
+
     public function toArray(): array {
         return ['type'=>'podcast','title'=>$this->episodeTitle];
     }
@@ -59,12 +77,16 @@ class Podcast implements Media {
 
 //　JSON復元用のファクトリ関数
 function mediaFromArray(array $row): Media {
-    return match (strtolower($row['type'] ?? '')) {
-        'music' => new Music($row['title'] ?? ''),
-        'video' => new Video($row['title'] ?? ''),
-        'podcast' => new Podcast($row['title'] ?? ''),
-        default => new Music($row['title'] ?? ''),
-    };
+    $type = strtolower($row['type'] ?? '');
+    if ($type === 'music') {
+        return new Music($row['title'] ?? '');
+    } elseif ($type === 'video') {
+        return new Video($row['title'] ?? '');
+    } elseif ($type === 'podcast') {
+        return new Podcast($row['title'] ?? '');
+    } else {
+        return new Music($row['title'] ?? '');
+    }
 }
 
 // JSON保存復元関数
@@ -110,10 +132,15 @@ function prompt(string $msg): string {
 
 
 // 再生処理(メディアプレイヤー)
-final class MediaPlayer {
+class MediaPlayer {
+
+    /** @var Media[] */
+    private $queue;
 
     /** @param Media[] $queue */
-    public function __construct(private array $queue = []) {}
+    public function __construct(array $queue = []) {
+        $this->queue = $queue;
+    }
 
     public function add(Media $m): void {
         $this->queue[] = $m;
