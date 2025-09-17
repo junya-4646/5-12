@@ -68,7 +68,7 @@ class Teacher extends Person {
         return $arr;
     }
 
-    public static function fromArray(array $row): static {
+    public static function fromArray(array $row): self {
         return new self($row['name'], (int)$row['age'], $row['subject']);
     }
 }
@@ -135,11 +135,13 @@ function loadPeople(): array {
     $people = [];
     foreach ($rows as $row) {
         $type = $row['type'] ?? 'person';
-        $obj = match ($type) {
-            'teacher' => Teacher::fromArray($row),
-            'student' => Student::fromArray($row),
-            default => Person::fromArray($row),
-        };
+        if ($type === 'teacher') {
+            $obj = Teacher::fromArray($row);
+        } elseif ($type === 'student') {
+            $obj = Student::fromArray($row);
+        } else {
+            $obj = Person::fromArray($row);
+        }
         $people[$obj->getName()] = $obj;
     }
     return $people;
