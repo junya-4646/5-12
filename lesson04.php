@@ -169,14 +169,27 @@ function maybePromote(Person $p, array &$people): void {
         return;
     }
 
-    $ans = strtolower(prompt("この人物に役割を付与しますか？ (t=教師 / s=学生 / n=しない) :"));
+    function normalizeInput(string $input): string {
+        $map = [
+            'ｔ' => 't', 'ｓ' => 's', 'ｎ' => 'n',
+        ];
+        return strtolower(trim(strtr($input, $map)));
+    }
+    $ans = normalizeInput(prompt("この人物に役割を付与しますか？ (t=教師 / s=学生 / n=しない) :"));
     if ($ans === 't') {
         $subject = prompt("教える科目：");
-        $people[$p->getName()] = new Teacher($p->getName(), $p->getAge(), $subject);        
+        $teacher = new Teacher($p->getName(), $p->getAge(), $subject); 
+        $people[$p->getName()] = $teacher;
+        $teacher->introduce(); 
+        flush();     
     } elseif ($ans === 's') {
         $id = Student::nextIdFrom($people);
-        $people[$p->getName()] = new Student($p->getName(), $p->getAge(), $id);
+        $student = new Student($p->getName(), $p->getAge(), $id);
+        $people[$p->getName()] = $student;
         echo "学生IDを自動発行しました：[$id]\n";
+        $student->introduce();
+    } else {
+        $p->introduce(); 
     }
 }
 
@@ -201,9 +214,11 @@ while (true) {
 
     // 新規登録：まずはPersonとして登録
     $age = (int)prompt("年齢：");
-    $people[$name] = new Person($name, $age);
+    $person = new Person($name, $age); 
+    $people[$name] = $person;
     savePeople($people);
     echo "登録しました（役割は未設定）。\n";
+    $person->introduce(); 
 }
 
 echo "\n保存して終了しました。\n";
