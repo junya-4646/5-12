@@ -64,7 +64,7 @@ class Podcast implements Media {
     }
 
     public function play(): void {
-        echo "[Podcast] [{$this->episodeTitle}] を再生中\n";
+        echo "[Podcast] ポッドキャストの [{$this->episodeTitle}] を再生中\n";
     }
 
     public function toArray(): array {
